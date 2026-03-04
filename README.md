@@ -1,36 +1,179 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SSC Batch 2013 — Community Portal
 
-## Getting Started
+A production-ready mobile-first web app for the SSC Batch 2013 community. Built with **Next.js 15** (App Router), **Prisma + MongoDB**, **NextAuth v5**, **Tailwind CSS**, and **Zod**.
 
-First, run the development server:
+---
+
+## Features
+
+- 📋 **Member Directory** — approved members with search
+- 📝 **Self-Registration** — pending → admin approves → appears in directory
+- 🎉 **Events** — admin creates events, manages participants with contribution & remarks
+- 🔐 **Admin Panel** — protected by NextAuth credentials (bcrypt password, env config)
+- 📱 **Mobile-first** — bottom navigation, bottom sheet modals
+
+---
+
+## Environment Variables
+
+Copy `.env.example` to `.env.local` and fill in:
+
+| Variable | Description |
+|---|---|
+| `DATABASE_URL` | MongoDB Atlas connection string |
+| `NEXTAUTH_SECRET` | Random secret (min 32 chars) — generate with `openssl rand -base64 32` |
+| `NEXTAUTH_URL` | Your deployment URL (e.g. `http://localhost:3000`) |
+| `ADMIN_EMAIL` | Admin login email |
+| `ADMIN_PASSWORD_HASH` | bcrypt hash of admin password |
+
+### Generate Password Hash
+
+```bash
+node -e "require('bcrypt').hash('YOUR_PASSWORD', 10).then(console.log)"
+```
+
+Paste the output as `ADMIN_PASSWORD_HASH` in `.env.local`.
+
+---
+
+## Setup Steps
+
+### 1. Install dependencies
+
+```bash
+npm install
+```
+
+### 2. Configure environment
+
+```bash
+cp .env.example .env.local
+# Edit .env.local with your values
+```
+
+### 3. Prisma Setup
+
+```bash
+# Generate Prisma Client
+npx prisma generate
+
+# Push schema to MongoDB (creates indexes)
+npx prisma db push
+```
+
+> **Note:** MongoDB with Prisma does not use `migrate`. Use `db push` instead.
+
+### 4. Run the dev server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Project Structure
 
-## Learn More
+```
+app/
+  (public)/          ← public pages with BottomNav
+    page.tsx          / landing
+    register/         /register
+    directory/        /directory
+    events/           /events + /events/[id]
+  admin/              ← protected admin pages
+    login/            /admin/login
+    page.tsx          /admin dashboard
+    approvals/        /admin/approvals
+    members/          /admin/members
+    events/           /admin/events + new + [id]
+  api/
+    register/         POST public registration
+    members/          GET approved members
+    events/           GET events + [id]
+    admin/            ← all require auth session
+      members/        GET+POST; [id] PATCH+DELETE; approve/reject
+      events/         GET+POST; [id] PATCH+DELETE; participants PUT+DELETE
+components/ui/      ← Button, Input, Textarea, Card, Modal, Toaster, BottomNav
+lib/
+  auth.ts             NextAuth v5 config
+  prisma.ts           Prisma singleton
+  phone.ts            BD phone normalization
+  schemas.ts          Zod schemas
+middleware.ts         Route protection for /admin/*
+prisma/schema.prisma  Member, Event, EventParticipant models
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## API Reference
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Public
+| Method | Route | Description |
+|---|---|---|
+| POST | `/api/register` | Self-register (status=PENDING) |
+| GET | `/api/members?q=` | Approved members with optional search |
+| GET | `/api/events` | All events |
+| GET | `/api/events/[id]` | Event detail with participants |
 
-## Deploy on Vercel
+### Admin (requires session)
+| Method | Route | Description |
+|---|---|---|
+| GET | `/api/admin/members?status=&q=` | All members with filters |
+| POST | `/api/admin/members` | Create approved member |
+| PATCH | `/api/admin/members/[id]` | Edit member |
+| DELETE | `/api/admin/members/[id]` | Delete member |
+| PATCH | `/api/admin/members/[id]/approve` | Approve registration |
+| PATCH | `/api/admin/members/[id]/reject` | Reject registration |
+| GET | `/api/admin/events` | All events |
+| POST | `/api/admin/events` | Create event |
+| PATCH | `/api/admin/events/[id]` | Edit event |
+| DELETE | `/api/admin/events/[id]` | Delete event |
+| PUT | `/api/admin/events/[id]/participants` | Upsert participant (contribution+remarks) |
+| DELETE | `/api/admin/events/[id]/participants/[memberId]` | Remove participant |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deployment (Vercel + MongoDB Atlas)
+
+1. **MongoDB Atlas**: Create free cluster → get connection string
+2. **Vercel**:
+   - Import your GitHub repo
+   - Set all env vars in Vercel dashboard (same as `.env.local`)
+   - Set `NEXTAUTH_URL` to your Vercel deployment URL
+3. **After deploy**: Run `npx prisma db push` once to create indexes
+
+---
+
+## Smoke Test Checklist
+
+After running `npm run dev`:
+
+- [ ] **Landing page** loads at `http://localhost:3000` with SSC logo, two nav cards, Register CTA
+- [ ] **Register**: Go to `/register`, submit a form → success message shown
+- [ ] **Admin login**: Go to `/admin/login`, log in with configured email/password → redirected to `/admin`
+- [ ] **Admin dashboard**: Shows stat cards — member counts, pending count
+- [ ] **Approvals**: Go to `/admin/approvals` → see registered member → click Approve → member moves to approved
+- [ ] **Directory**: Go to `/directory` → approved member appears, search works
+- [ ] **Admin Members**: Go to `/admin/members` → member visible → Add new member (provides phone normalization), Edit, Delete work
+- [ ] **Duplicate phone**: Try registering with same phone → 409 Conflict error shown
+- [ ] **Create Event**: Go to `/admin/events` → New → fill form → event created
+- [ ] **Manage Participants**: In `/admin/events/[id]`, search for a member → Add → enter contribution (e.g. 500), remarks → Add to Event → participant appears in list with contribution
+- [ ] **Edit Participant**: Click Edit on participant → change contribution → Update → reflects immediately
+- [ ] **Remove Participant**: Click Remove → participant gone, total updates
+- [ ] **Public Event Detail**: Go to `/events/[id]` → see participants and total contribution
+- [ ] **Sign out**: Click Sign Out → redirected to login
+
+---
+
+## Phone Normalization
+
+`lib/phone.ts` normalizes BD phone numbers:
+
+| Input | Normalized |
+|---|---|
+| `01712345678` | `+8801712345678` |
+| `8801712345678` | `+8801712345678` |
+| `+8801712345678` | `+8801712345678` |
+| `017-1234-5678` | `+8801712345678` |

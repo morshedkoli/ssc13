@@ -1,26 +1,218 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #f7f8fb;
+  --surface: #ffffff;
+  --surface-soft: #f3f5fa;
+  --border: #e5e9f2;
+  --text: #111827;
+  --text-muted: #59657a;
+
+  --primary: #4f6fd8;
+  --primary-soft: #e8eeff;
+  --teal: #2f9e9e;
+  --accent: #ffd8e9;
+
+  --success: #0f9f6e;
+  --warning: #d18d1f;
+  --danger: #d14359;
+  --danger-soft: #fff1f3;
+
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05), 0 4px 20px rgba(30, 64, 175, 0.04);
+  --shadow-md: 0 6px 20px rgba(15, 23, 42, 0.08), 0 12px 40px rgba(30, 64, 175, 0.07);
+  --shadow-lg: 0 14px 50px rgba(15, 23, 42, 0.14), 0 20px 80px rgba(30, 64, 175, 0.1);
+
+  --radius-card: 1.25rem;
+  --radius-pill: 9999px;
+
+  --gradient-soft: linear-gradient(120deg, #eef4ff 0%, #eefaf8 55%, #fff8ee 100%);
+  --gradient-primary: linear-gradient(135deg, #506fd8 0%, #3f8dbd 50%, #55b9b2 100%);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* {
+  box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  min-height: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  background: radial-gradient(circle at 10% -10%, #eaf0ff 0%, transparent 35%),
+    radial-gradient(circle at 100% 0%, #ecfbf9 0%, transparent 35%),
+    var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: #dbe6ff;
+  color: #1e3a8a;
+}
+
+*:focus-visible {
+  outline: 2px solid #5d7ce2;
+  outline-offset: 2px;
+  border-radius: 0.55rem;
+}
+
+.page-container {
+  width: 100%;
+  max-width: 80rem;
+  margin: 0 auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.form-container {
+  width: 100%;
+  max-width: 42rem;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .page-container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .page-container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+.surface-card {
+  background: color-mix(in srgb, var(--surface) 92%, #f2f7ff 8%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sm);
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border-radius: var(--radius-pill);
+  padding: 0.2rem 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.badge-approved {
+  color: #0d7a53;
+  background: #dcfce9;
+}
+
+.badge-pending {
+  color: #7d4e0e;
+  background: #fff3d6;
+}
+
+.badge-rejected {
+  color: #9f1734;
+  background: #ffe4ea;
+}
+
+.badge-info {
+  color: #2847a8;
+  background: #e8eeff;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #eef2f7 25%, #dde4ef 50%, #eef2f7 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s linear infinite;
+  border-radius: 0.75rem;
+}
+
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@keyframes shimmer {
+  from {
+    background-position: -200% 0;
+  }
+
+  to {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease both;
+}
+
+.animate-fade-up {
+  animation: fadeInUp 0.45s ease both;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s ease both;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.35s ease both;
 }

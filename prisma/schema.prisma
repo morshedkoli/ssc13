@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum MemberStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum RsvpStatus {
+  GOING
+  MAYBE
+  NOT_GOING
+}
+
+model Member {
+  id              String        @id @default(auto()) @map("_id") @db.ObjectId
+  name            String
+  phoneRaw        String
+  phoneNormalized String        @unique
+  address         String?
+  facebook        String?
+  status          MemberStatus  @default(PENDING)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  participations  EventParticipant[]
+}
+
+model Event {
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  title        String
+  description  String?
+  location     String?
+  imageUrl     String?
+  startsAt     DateTime
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  participants EventParticipant[]
+}
+
+model EventParticipant {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  eventId      String     @db.ObjectId
+  memberId     String     @db.ObjectId
+  contribution Int?       // BDT, non-negative
+  remarks      String?
+  rsvp         RsvpStatus?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  event  Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, memberId])
+}
