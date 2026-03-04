@@ -13,9 +13,6 @@ export default function AdminLoginPage() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
-    const QUICK_ADMIN_EMAIL = "admin@ssc13.com";
-    const QUICK_ADMIN_PASSWORD = "Admin@SSC2013!";
-
     async function submit(e: React.FormEvent) {
         e.preventDefault();
         setError("");
@@ -24,26 +21,6 @@ export default function AdminLoginPage() {
             const res = await signIn("credentials", { email, password, redirect: false });
             if (res?.error) {
                 setError("Invalid email or password");
-                return;
-            }
-            router.push("/admin");
-            router.refresh();
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    async function quickLogin() {
-        setError("");
-        setLoading(true);
-        try {
-            const res = await signIn("credentials", {
-                email: QUICK_ADMIN_EMAIL,
-                password: QUICK_ADMIN_PASSWORD,
-                redirect: false,
-            });
-            if (res?.error) {
-                setError("Quick login failed. Please use manual login.");
                 return;
             }
             router.push("/admin");
@@ -67,9 +44,6 @@ export default function AdminLoginPage() {
                     <Input label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
                     {error ? <p className="text-sm text-[var(--danger)]">{error}</p> : null}
                     <Button type="submit" loading={loading} fullWidth>Sign In</Button>
-                    <Button type="button" variant="secondary" onClick={quickLogin} fullWidth disabled={loading}>
-                        One-Click Admin Login
-                    </Button>
                 </form>
             </div>
         </div>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdminApi } from "@/lib/require-admin";
+import { Prisma } from "@prisma/client";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -14,8 +15,10 @@ export async function PATCH(_req: NextRequest, { params }: Ctx) {
             data: { status: "REJECTED" },
         });
         return NextResponse.json(member);
-    } catch (err: any) {
-        if (err.code === "P2025") return NextResponse.json({ error: "Member not found" }, { status: 404 });
+    } catch (err: unknown) {
+        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025") {
+            return NextResponse.json({ error: "Member not found" }, { status: 404 });
+        }
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 }

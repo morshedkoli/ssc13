@@ -7,7 +7,7 @@ export function normalizePhone(input: string): string {
   let digits = input.trim().replace(/[\s\-().]/g, "");
 
   // Handle leading + separately
-  let hasPlus = digits.startsWith("+");
+  const hasPlus = digits.startsWith("+");
   if (hasPlus) digits = digits.slice(1);
 
   // Remove all non-digit chars now

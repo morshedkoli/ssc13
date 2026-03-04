@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { adminEditMemberSchema } from "@/lib/schemas";
 import { normalizePhone } from "@/lib/phone";
 import { requireAdminApi } from "@/lib/require-admin";
+import { Prisma } from "@prisma/client";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -17,7 +18,7 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
             return NextResponse.json({ error: "Validation failed", issues: parsed.error.flatten().fieldErrors }, { status: 400 });
         }
 
-        const data: Record<string, any> = {};
+        const data: Record<string, string | null> = {};
         if (parsed.data.name) data.name = parsed.data.name.trim();
         if (parsed.data.phone) {
             const phoneNormalized = normalizePhone(parsed.data.phone);
@@ -34,8 +35,10 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
 
         const member = await prisma.member.update({ where: { id }, data });
         return NextResponse.json(member);
-    } catch (err: any) {
-        if (err.code === "P2025") return NextResponse.json({ error: "Member not found" }, { status: 404 });
+    } catch (err: unknown) {
+        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025") {
+            return NextResponse.json({ error: "Member not found" }, { status: 404 });
+        }
         console.error(err);
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
@@ -48,8 +51,10 @@ export async function DELETE(_req: NextRequest, { params }: Ctx) {
     try {
         await prisma.member.delete({ where: { id } });
         return NextResponse.json({ success: true });
-    } catch (err: any) {
-        if (err.code === "P2025") return NextResponse.json({ error: "Member not found" }, { status: 404 });
+    } catch (err: unknown) {
+        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025") {
+            return NextResponse.json({ error: "Member not found" }, { status: 404 });
+        }
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 }

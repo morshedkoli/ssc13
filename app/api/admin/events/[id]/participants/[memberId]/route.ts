@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdminApi } from "@/lib/require-admin";
+import { Prisma } from "@prisma/client";
 
 type Ctx = { params: Promise<{ id: string; memberId: string }> };
 
@@ -13,8 +14,10 @@ export async function DELETE(_req: NextRequest, { params }: Ctx) {
             where: { eventId_memberId: { eventId, memberId } },
         });
         return NextResponse.json({ success: true });
-    } catch (err: any) {
-        if (err.code === "P2025") return NextResponse.json({ error: "Participant not found" }, { status: 404 });
+    } catch (err: unknown) {
+        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025") {
+            return NextResponse.json({ error: "Participant not found" }, { status: 404 });
+        }
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 }

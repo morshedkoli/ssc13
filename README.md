@@ -1,6 +1,6 @@
 # SSC Batch 2013 — Community Portal
 
-A production-ready mobile-first web app for the SSC Batch 2013 community. Built with **Next.js 15** (App Router), **Prisma + MongoDB**, **NextAuth v5**, **Tailwind CSS**, and **Zod**.
+A production-ready mobile-first web app for the SSC Batch 2013 community. Built with **Next.js 16** (App Router), **Prisma + MongoDB**, **NextAuth v4**, **Tailwind CSS**, and **Zod**.
 
 ---
 
@@ -24,7 +24,7 @@ Copy `.env.example` to `.env.local` and fill in:
 | `NEXTAUTH_SECRET` | Random secret (min 32 chars) — generate with `openssl rand -base64 32` |
 | `NEXTAUTH_URL` | Your deployment URL (e.g. `http://localhost:3000`) |
 | `ADMIN_EMAIL` | Admin login email |
-| `ADMIN_PASSWORD_HASH` | bcrypt hash of admin password |
+| `ADMIN_PASSWORD_HASH` | bcrypt hash of admin password (escape `$` as `\\$`) |
 
 ### Generate Password Hash
 
@@ -97,7 +97,7 @@ app/
       events/         GET+POST; [id] PATCH+DELETE; participants PUT+DELETE
 components/ui/      ← Button, Input, Textarea, Card, Modal, Toaster, BottomNav
 lib/
-  auth.ts             NextAuth v5 config
+  auth.ts             NextAuth v4 config
   prisma.ts           Prisma singleton
   phone.ts            BD phone normalization
   schemas.ts          Zod schemas
@@ -142,7 +142,14 @@ prisma/schema.prisma  Member, Event, EventParticipant models
    - Import your GitHub repo
    - Set all env vars in Vercel dashboard (same as `.env.local`)
    - Set `NEXTAUTH_URL` to your Vercel deployment URL
-3. **After deploy**: Run `npx prisma db push` once to create indexes
+3. **Build Settings**:
+   - Framework preset: `Next.js`
+   - Install command: `npm install`
+   - Build command: `npm run build`
+4. **After deploy**: Run `npm run db:push` once to create indexes
+5. **Auth sanity check**:
+   - Ensure `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`, `NEXTAUTH_SECRET`, and `NEXTAUTH_URL` exist in Vercel env vars
+   - Redeploy after changing auth env vars
 
 ---
 

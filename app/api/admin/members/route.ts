@@ -3,16 +3,21 @@ import { prisma } from "@/lib/prisma";
 import { adminCreateMemberSchema } from "@/lib/schemas";
 import { normalizePhone } from "@/lib/phone";
 import { requireAdminApi } from "@/lib/require-admin";
+import { MemberStatus } from "@prisma/client";
 
 // GET /api/admin/members — all members with optional filter
 export async function GET(req: NextRequest) {
     if (!(await requireAdminApi())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const status = req.nextUrl.searchParams.get("status");
+    const statusParam = req.nextUrl.searchParams.get("status");
     const q = req.nextUrl.searchParams.get("q") || "";
+    const status =
+        statusParam === "PENDING" || statusParam === "APPROVED" || statusParam === "REJECTED"
+            ? (statusParam as MemberStatus)
+            : undefined;
 
     const members = await prisma.member.findMany({
         where: {
-            ...(status ? { status: status as any } : {}),
+            ...(status ? { status } : {}),
             ...(q
                 ? {
                     OR: [
