@@ -2,7 +2,6 @@
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import { useToast } from "@/components/ui/Toaster";
 import { Input } from "@/components/ui/Input";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -23,10 +22,8 @@ function displayImageUrl(value?: string) {
 }
 
 export default function AdminEventsPage() {
-    const { toast } = useToast();
     const [events, setEvents] = useState<Event[]>([]);
     const [loading, setLoading] = useState(true);
-    const [deleting, setDeleting] = useState<string | null>(null);
     const [q, setQ] = useState("");
 
     async function load() {
@@ -42,22 +39,6 @@ export default function AdminEventsPage() {
     useEffect(() => {
         load();
     }, []);
-
-    async function del(id: string) {
-        if (!confirm("Delete this event and participants?")) return;
-        setDeleting(id);
-        try {
-            const res = await fetch(`/api/admin/events/${id}`, { method: "DELETE" });
-            if (!res.ok) {
-                toast("Delete failed", "error");
-                return;
-            }
-            toast("Event deleted", "info");
-            setEvents((p) => p.filter((e) => e.id !== id));
-        } finally {
-            setDeleting(null);
-        }
-    }
 
     const filtered = useMemo(() => {
         const query = q.trim().toLowerCase();
@@ -100,7 +81,7 @@ export default function AdminEventsPage() {
                                 <span className="badge badge-info">Participants: {ev._count.participants}</span>
                                 <div className="flex gap-2">
                                     <Link href={`/admin/events/${ev.id}`}><Button size="sm" variant="secondary">Manage</Button></Link>
-                                    <Button size="sm" variant="danger" onClick={() => del(ev.id)} loading={deleting === ev.id}>Delete</Button>
+                                    <Button size="sm" variant="danger" disabled title="Event deletion is disabled">Delete</Button>
                                 </div>
                             </div>
                         </div>
