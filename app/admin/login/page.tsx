@@ -12,21 +12,36 @@ export default function AdminLoginPage() {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+    const [quickLoading, setQuickLoading] = useState(false);
+
+    async function doLogin(email: string, password: string) {
+        setError("");
+        const res = await signIn("credentials", { email, password, redirect: false });
+        if (res?.error) {
+            setError("Invalid email or password");
+            return false;
+        }
+        router.push("/admin");
+        router.refresh();
+        return true;
+    }
 
     async function submit(e: React.FormEvent) {
         e.preventDefault();
-        setError("");
         setLoading(true);
         try {
-            const res = await signIn("credentials", { email, password, redirect: false });
-            if (res?.error) {
-                setError("Invalid email or password");
-                return;
-            }
-            router.push("/admin");
-            router.refresh();
+            await doLogin(email, password);
         } finally {
             setLoading(false);
+        }
+    }
+
+    async function quickLogin() {
+        setQuickLoading(true);
+        try {
+            await doLogin("admin@ssc.com", "admin123");
+        } finally {
+            setQuickLoading(false);
         }
     }
 
@@ -45,6 +60,18 @@ export default function AdminLoginPage() {
                     {error ? <p className="text-sm text-[var(--danger)]">{error}</p> : null}
                     <Button type="submit" loading={loading} fullWidth>Sign In</Button>
                 </form>
+                <div className="mt-4 flex items-center gap-3">
+                    <div className="flex-1 h-px bg-[var(--border)]" />
+                    <span className="text-xs text-[var(--text-muted)]">or</span>
+                    <div className="flex-1 h-px bg-[var(--border)]" />
+                </div>
+                <button
+                    onClick={quickLogin}
+                    disabled={quickLoading}
+                    className="mt-4 w-full py-2.5 px-4 rounded-lg text-sm font-semibold border border-[var(--border)] text-[var(--text)] bg-[var(--surface)] hover:bg-[var(--surface-hover)] transition-colors disabled:opacity-50"
+                >
+                    {quickLoading ? "Signing in…" : "Quick Admin Login"}
+                </button>
             </div>
         </div>
     );

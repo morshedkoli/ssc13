@@ -43,7 +43,7 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
                 rsvp: rsvp ?? null,
             },
             include: {
-                member: { select: { id: true, name: true, phoneRaw: true } },
+                member: { select: { id: true, name: true, phoneRaw: true, occupation: true } },
             },
         });
 

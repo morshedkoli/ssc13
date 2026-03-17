@@ -2,12 +2,13 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 import { useToast } from "@/components/ui/Toaster";
 import { Alert } from "@/components/ui/Alert";
 
 export default function RegisterPage() {
     const { toast } = useToast();
-    const [form, setForm] = useState({ name: "", phone: "", address: "", facebook: "" });
+    const [form, setForm] = useState({ name: "", phone: "", address: "", facebook: "", occupation: "" });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(false);
     const [done, setDone] = useState(false);
@@ -93,6 +94,17 @@ export default function RegisterPage() {
                         onChange={(e) => setForm((p) => ({ ...p, facebook: e.target.value }))}
                         error={errors.facebook}
                     />
+                    <Select
+                        label="Occupation"
+                        value={form.occupation}
+                        onChange={(e) => setForm((p) => ({ ...p, occupation: e.target.value }))}
+                        error={errors.occupation}
+                    >
+                        <option value="">Select Occupation</option>
+                        <option value="Job">Job</option>
+                        <option value="Foreign Job">Foreign Job</option>
+                        <option value="Business">Business</option>
+                    </Select>
 
                     <div className="pt-2">
                         <Button type="submit" loading={loading} fullWidth size="lg">

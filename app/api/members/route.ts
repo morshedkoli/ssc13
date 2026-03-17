@@ -26,6 +26,7 @@ export async function GET(req: NextRequest) {
             phoneNormalized: true,
             address: true,
             facebook: true,
+            occupation: true,
             createdAt: true,
         },
     });

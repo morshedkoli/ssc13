@@ -8,7 +8,12 @@ import { redirect } from "next/navigation";
  * This is the "proxy" pattern—auth enforcement happens server-side in each page.
  */
 export async function requireAdmin() {
-    const session = await getServerSession(authOptions);
+    let session = null;
+    try {
+        session = await getServerSession(authOptions);
+    } catch {
+        // Corrupt JWT — treat as unauthenticated
+    }
     if (!session) {
         redirect("/admin/login");
     }
@@ -19,6 +24,10 @@ export async function requireAdmin() {
  * For API route handlers — returns 401 if no session.
  */
 export async function requireAdminApi(): Promise<boolean> {
-    const session = await getServerSession(authOptions);
-    return !!session;
+    try {
+        const session = await getServerSession(authOptions);
+        return !!session;
+    } catch {
+        return false;
+    }
 }

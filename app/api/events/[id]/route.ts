@@ -11,7 +11,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
             participants: {
                 include: {
                     member: {
-                        select: { id: true, name: true, phoneRaw: true, address: true },
+                        select: { id: true, name: true, phoneRaw: true, address: true, occupation: true },
                     },
                 },
                 orderBy: { createdAt: "asc" },

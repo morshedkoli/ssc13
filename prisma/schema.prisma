@@ -26,6 +26,7 @@ model Member {
   phoneNormalized String        @unique
   address         String?
   facebook        String?
+  occupation      String?
   status          MemberStatus  @default(PENDING)
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt

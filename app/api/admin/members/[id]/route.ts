@@ -32,6 +32,7 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
         }
         if ("address" in parsed.data) data.address = parsed.data.address?.trim() || null;
         if ("facebook" in parsed.data) data.facebook = parsed.data.facebook?.trim() || null;
+        if ("occupation" in parsed.data) data.occupation = parsed.data.occupation?.trim() || null;
 
         const member = await prisma.member.update({ where: { id }, data });
         return NextResponse.json(member);

@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        const { name, phone, address, facebook } = parsed.data;
+        const { name, phone, address, facebook, occupation } = parsed.data;
         const phoneNormalized = normalizePhone(phone);
 
         const existing = await prisma.member.findUnique({ where: { phoneNormalized } });
@@ -62,6 +62,7 @@ export async function POST(req: NextRequest) {
                 phoneNormalized,
                 address: address?.trim() || null,
                 facebook: facebook?.trim() || null,
+                occupation: occupation?.trim() || null,
                 status: "APPROVED",
             },
         });

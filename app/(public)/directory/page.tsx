@@ -10,6 +10,7 @@ interface Member {
     phoneRaw: string;
     address?: string;
     facebook?: string;
+    occupation?: string;
 }
 
 export default function DirectoryPage() {
@@ -71,6 +72,7 @@ export default function DirectoryPage() {
                                 <span className="badge badge-approved">Approved</span>
                             </div>
                             {m.address ? <p className="text-sm text-[var(--text-muted)]">{m.address}</p> : null}
+                            {m.occupation ? <p className="text-sm text-[var(--text-muted)]">{m.occupation}</p> : null}
                             {m.facebook ? (
                                 <a
                                     href={m.facebook.startsWith("http") ? m.facebook : `https://facebook.com/${m.facebook}`}

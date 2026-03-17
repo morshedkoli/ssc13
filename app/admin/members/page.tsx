@@ -16,6 +16,7 @@ interface Member {
     phoneRaw: string;
     address?: string;
     facebook?: string;
+    occupation?: string;
     status: "APPROVED" | "PENDING" | "REJECTED";
 }
 
@@ -24,9 +25,10 @@ interface FormData {
     phone: string;
     address: string;
     facebook: string;
+    occupation: string;
 }
 
-const EMPTY: FormData = { name: "", phone: "", address: "", facebook: "" };
+const EMPTY: FormData = { name: "", phone: "", address: "", facebook: "", occupation: "" };
 
 export default function MembersPage() {
     const { toast } = useToast();
@@ -65,7 +67,7 @@ export default function MembersPage() {
 
     function openEdit(m: Member) {
         setEditing(m);
-        setForm({ name: m.name, phone: m.phoneRaw, address: m.address || "", facebook: m.facebook || "" });
+        setForm({ name: m.name, phone: m.phoneRaw, address: m.address || "", facebook: m.facebook || "", occupation: m.occupation || "" });
         setFormError("");
         setModal("edit");
     }
@@ -79,7 +81,7 @@ export default function MembersPage() {
             const res = await fetch(url, {
                 method,
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name: form.name, phone: form.phone, address: form.address, facebook: form.facebook }),
+                body: JSON.stringify({ name: form.name, phone: form.phone, address: form.address, facebook: form.facebook, occupation: form.occupation }),
             });
             const data = await res.json();
             if (!res.ok) {
@@ -148,6 +150,7 @@ export default function MembersPage() {
                                         <TH>Name</TH>
                                         <TH>Phone</TH>
                                         <TH>Address</TH>
+                                        <TH>Occupation</TH>
                                         <TH>Status</TH>
                                         <TH className="text-right">Actions</TH>
                                     </tr>
@@ -158,6 +161,7 @@ export default function MembersPage() {
                                             <TD>{m.name}</TD>
                                             <TD>{m.phoneRaw}</TD>
                                             <TD>{m.address || "-"}</TD>
+                                            <TD>{m.occupation || "-"}</TD>
                                             <TD>
                                                 <Badge variant={m.status === "APPROVED" ? "approved" : m.status === "PENDING" ? "pending" : "rejected"}>{m.status.toLowerCase()}</Badge>
                                             </TD>
@@ -181,6 +185,7 @@ export default function MembersPage() {
                                         <p className="font-semibold">{m.name}</p>
                                         <p className="text-sm text-[var(--text-muted)]">{m.phoneRaw}</p>
                                         {m.address ? <p className="text-sm text-[var(--text-muted)]">{m.address}</p> : null}
+                                        {m.occupation ? <p className="text-sm text-[var(--text-muted)]">{m.occupation}</p> : null}
                                     </div>
                                     <Badge variant={m.status === "APPROVED" ? "approved" : m.status === "PENDING" ? "pending" : "rejected"}>{m.status.toLowerCase()}</Badge>
                                 </div>
@@ -200,6 +205,12 @@ export default function MembersPage() {
                     <Input label="Phone" value={form.phone} onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))} required />
                     <Input label="Address" value={form.address} onChange={(e) => setForm((p) => ({ ...p, address: e.target.value }))} />
                     <Input label="Facebook" value={form.facebook} onChange={(e) => setForm((p) => ({ ...p, facebook: e.target.value }))} />
+                    <Select label="Occupation" value={form.occupation} onChange={(e) => setForm((p) => ({ ...p, occupation: e.target.value }))}>
+                        <option value="">Select Occupation</option>
+                        <option value="Job">Job</option>
+                        <option value="Foreign Job">Foreign Job</option>
+                        <option value="Business">Business</option>
+                    </Select>
                     {formError ? <p className="text-sm text-[var(--danger)]">{formError}</p> : null}
                     <Button onClick={save} loading={saving} fullWidth>{modal === "add" ? "Add Member" : "Save Changes"}</Button>
                 </div>

@@ -12,6 +12,7 @@ interface Member {
     id: string;
     name: string;
     phoneRaw: string;
+    occupation?: string | null;
 }
 
 interface Participant {
@@ -63,6 +64,7 @@ export default function AdminEventDetailPage({ params }: { params: Promise<{ id:
     const [partForm, setPartForm] = useState({ contribution: "", remarks: "" });
     const [partSaving, setPartSaving] = useState(false);
     const [removingId, setRemovingId] = useState<string | null>(null);
+    const [occFilter, setOccFilter] = useState("");
 
     const fetchEvent = useCallback(async () => {
         const res = await fetch(`/api/events/${id}`);
@@ -201,6 +203,12 @@ export default function AdminEventDetailPage({ params }: { params: Promise<{ id:
 
     const totalContribution = event.participants.reduce((sum, p) => sum + (p.contribution || 0), 0);
 
+    const occupations = Array.from(new Set(event.participants.map((p) => p.member.occupation).filter(Boolean) as string[])).sort();
+    const filteredParticipants = occFilter
+        ? event.participants.filter((p) => p.member.occupation === occFilter)
+        : event.participants;
+    const filteredTotal = filteredParticipants.reduce((sum, p) => sum + (p.contribution || 0), 0);
+
     return (
         <div className="space-y-4">
             <Link href="/admin/events" className="text-sm text-[var(--text-muted)] hover:text-[var(--text)] inline-flex">Back to Events</Link>
@@ -247,26 +255,39 @@ export default function AdminEventDetailPage({ params }: { params: Promise<{ id:
             </div>
 
             <Card className="p-5">
-                <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-lg font-bold">Participants ({event.participants.length})</h2>
-                    <div className="badge badge-approved">Total: BDT {totalContribution.toLocaleString()}</div>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+                    <h2 className="text-lg font-bold">Participants ({filteredParticipants.length}{occFilter ? ` of ${event.participants.length}` : ""})</h2>
+                    <div className="flex items-center gap-3">
+                        {occupations.length > 0 ? (
+                            <select
+                                value={occFilter}
+                                onChange={(e) => setOccFilter(e.target.value)}
+                                className="rounded-lg border border-[var(--border)] bg-[var(--surface)] text-sm px-3 py-1.5 text-[var(--text)]"
+                            >
+                                <option value="">All Occupations</option>
+                                {occupations.map((o) => (
+                                    <option key={o} value={o}>{o}</option>
+                                ))}
+                            </select>
+                        ) : null}
+                        <div className="badge badge-approved">Total: BDT {filteredTotal.toLocaleString()}</div>
+                    </div>
                 </div>
 
-                {event.participants.length === 0 ? (
-                    <EmptyState title="No participants yet" description="Search and add approved members from the panel above." />
+                {filteredParticipants.length === 0 ? (
+                    <EmptyState title={occFilter ? "No participants with this occupation" : "No participants yet"} description={occFilter ? "Try a different filter." : "Search and add approved members from the panel above."} />
                 ) : (
                     <div className="space-y-3">
-                        {event.participants.map((p) => (
+                        {filteredParticipants.map((p) => (
                             <div key={p.id} className="rounded-xl border border-[var(--border)] bg-white p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                 <div>
                                     <p className="font-semibold">{p.member.name}</p>
-                                    <p className="text-sm text-[var(--text-muted)]">{p.member.phoneRaw}</p>
+                                    <p className="text-sm text-[var(--text-muted)]">{p.member.phoneRaw}{p.member.occupation ? ` · ${p.member.occupation}` : ""}</p>
                                     {p.remarks ? <p className="text-sm text-[var(--text-muted)] mt-1">{p.remarks}</p> : null}
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <span className="badge badge-info">BDT {(p.contribution || 0).toLocaleString()}</span>
                                     <Button size="sm" variant="secondary" onClick={() => openEditParticipant(p)}>Edit</Button>
-                                    <Button size="sm" variant="danger" onClick={() => removeParticipant(p.memberId)} loading={removingId === p.memberId}>Remove</Button>
                                 </div>
                             </div>
                         ))}

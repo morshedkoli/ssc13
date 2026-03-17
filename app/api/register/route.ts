@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        const { name, phone, address, facebook } = parsed.data;
+        const { name, phone, address, facebook, occupation } = parsed.data;
         const phoneNormalized = normalizePhone(phone);
 
         // Check duplicate
@@ -35,6 +35,7 @@ export async function POST(req: NextRequest) {
                 phoneNormalized,
                 address: address?.trim() || null,
                 facebook: facebook?.trim() || null,
+                occupation: occupation?.trim() || null,
                 status: "PENDING",
             },
         });

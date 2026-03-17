@@ -10,6 +10,7 @@ export const registerSchema = z.object({
         .refine(isValidPhone, "Invalid phone number"),
     address: z.string().optional(),
     facebook: z.string().optional(),
+    occupation: z.enum(["Job", "Foreign Job", "Business", ""]).optional(),
 });
 
 export const adminCreateMemberSchema = z.object({
@@ -17,6 +18,7 @@ export const adminCreateMemberSchema = z.object({
     phone: z.string().min(1).refine(isValidPhone, "Invalid phone number"),
     address: z.string().optional(),
     facebook: z.string().optional(),
+    occupation: z.enum(["Job", "Foreign Job", "Business", ""]).optional(),
 });
 
 export const adminEditMemberSchema = z.object({
@@ -24,6 +26,7 @@ export const adminEditMemberSchema = z.object({
     phone: z.string().refine(isValidPhone, "Invalid phone number").optional(),
     address: z.string().optional(),
     facebook: z.string().optional(),
+    occupation: z.enum(["Job", "Foreign Job", "Business", ""]).optional(),
 });
 
 // ---- Event ----
